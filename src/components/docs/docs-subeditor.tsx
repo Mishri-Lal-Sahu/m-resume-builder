@@ -52,7 +52,7 @@ export function DocsSubEditor({ content, onChange, placeholder, onFocus }: SubEd
     <div className="relative group w-full">
       {/* Mini formatting toolbar smoothly revealing on hover */}
       {editor && editor.isFocused && (
-        <div className="absolute -top-8 right-0 bg-zinc-900 text-white rounded shadow px-2 py-1 flex gap-1 z-50 text-xs">
+        <div className="absolute right-0 top-0 bg-zinc-900 text-white rounded shadow px-2 py-1 flex gap-1 z-50 text-xs">
           <button onMouseDown={e => { e.preventDefault(); editor.chain().focus().toggleBold().run() }} className={`px-1.5 hover:bg-zinc-700 rounded ${editor.isActive('bold') ? 'bg-zinc-700' : ''}`}>B</button>
           <button onMouseDown={e => { e.preventDefault(); editor.chain().focus().toggleItalic().run() }} className={`px-1.5 hover:bg-zinc-700 rounded ${editor.isActive('italic') ? 'bg-zinc-700' : ''}`}>I</button>
           <button onMouseDown={e => { e.preventDefault(); editor.chain().focus().toggleUnderline().run() }} className={`px-1.5 hover:bg-zinc-700 rounded ${editor.isActive('underline') ? 'bg-zinc-700' : ''}`}>U</button>

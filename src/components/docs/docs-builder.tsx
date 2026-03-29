@@ -18,6 +18,7 @@ export function DocsBuilder({ resumeId, initialTitle, initialContent }: DocsBuil
   const [title, setTitle] = useState(initialTitle);
   const [status, setStatus] = useState<SaveStatus>("idle");
   const [editorInstance, setEditorInstance] = useState<any>(null); // Main editor (for saving)
+  const [activeMainEditor, setActiveMainEditor] = useState<any>(null); // Focused page editor for toolbar/header actions
   const [zoom, setZoom] = useState(1);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -61,7 +62,7 @@ export function DocsBuilder({ resumeId, initialTitle, initialContent }: DocsBuil
       <div className="print:hidden">
         <DocsHeader
           title={title}
-          editor={editorInstance}
+          editor={activeMainEditor || editorInstance}
           onTitleChange={(t: string) => {
             setTitle(t);
             if (editorInstance) {
@@ -76,7 +77,7 @@ export function DocsBuilder({ resumeId, initialTitle, initialContent }: DocsBuil
       <div className="border-b border-zinc-200 bg-white px-4 py-1.5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 flex-shrink-0 print:hidden">
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
-            <DocsToolbar editor={editorInstance} />
+            <DocsToolbar editor={activeMainEditor || editorInstance} />
           </div>
           <div className="flex items-center gap-1 rounded-lg border border-zinc-200 bg-zinc-50 px-1.5 py-1 dark:border-zinc-700 dark:bg-zinc-800/60">
             <button
@@ -174,8 +175,10 @@ export function DocsBuilder({ resumeId, initialTitle, initialContent }: DocsBuil
               initialContent={initialContent}
               onReady={(e: any) => {
                 setEditorInstance(e);
+                setActiveMainEditor(e);
               }}
               onChange={(json: TipTapDoc) => debouncedSave(title, json)}
+              onFocus={setActiveMainEditor}
             />
           </div>
         </main>

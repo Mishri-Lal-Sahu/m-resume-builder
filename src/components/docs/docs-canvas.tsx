@@ -72,6 +72,7 @@ const PAGE_WIDTH_PX = 794; // 210mm
 const PAGE_HEIGHT_PX = 1123; // 297mm
 // Header + footer zones are fixed at 30mm each. Usable content height is ~237mm (about 897px at 96dpi).
 const PRINTABLE_HEIGHT_PX = 897;
+const SPLIT_SAFETY_PX = 6;
 
 function isDocEffectivelyEmpty(docJson: any): boolean {
   if (!docJson || typeof docJson !== "object") return true;
@@ -112,7 +113,7 @@ type PageEditorProps = {
   onReady: (pageIndex: number, editor: any) => void;
   onFocus?: (editor: any) => void;
   onOverflow: (pageIndex: number, overflowNodes: any[], focusNext: boolean) => void;
-  onUnderflow: (pageIndex: number) => void;
+  onUnderflow: (pageIndex: number, isEmpty: boolean) => void;
   onChange: (pageIndex: number, json: any) => void;
 };
 
@@ -203,7 +204,10 @@ function PageEditor({
           }
         } else if (pageIndex > 0 && isEffectivelyEmpty) {
           // Page is empty — remove it, move cursor to end of previous page
-          onUnderflow(pageIndex);
+          onUnderflow(pageIndex, true);
+        } else {
+          // Page has room now, try to pull content from the next page upward.
+          onUnderflow(pageIndex, false);
         }
       });
     },
@@ -222,12 +226,12 @@ function PageEditor({
 
   return (
     <div
-      className="docs-page-box relative bg-white dark:bg-zinc-900 shadow-xl ring-1 ring-zinc-200 dark:ring-zinc-800 mx-auto shrink-0 print:shadow-none print:ring-0"
-      style={{ width: `${PAGE_WIDTH_PX}px`, minHeight: `${PAGE_HEIGHT_PX}px` }}
+      className="docs-page-box relative mx-auto flex shrink-0 flex-col overflow-hidden bg-white shadow-xl ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800 print:shadow-none print:ring-0"
+      style={{ width: `${PAGE_WIDTH_PX}px`, minHeight: `${PAGE_HEIGHT_PX}px`, height: `${PAGE_HEIGHT_PX}px` }}
     >
       {/* ── Header ── */}
       <div
-        className="absolute top-0 left-0 right-0 z-10 box-border flex h-[30mm] items-center border-b border-zinc-100 bg-white px-[25.4mm] py-[6mm] dark:border-zinc-800 dark:bg-zinc-900"
+        className="z-10 box-border flex h-[30mm] shrink-0 items-center border-b border-zinc-100 bg-white px-[25.4mm] py-[6mm] dark:border-zinc-800 dark:bg-zinc-900"
       >
         <DocsSubEditor
           content={headerContent}
@@ -240,10 +244,8 @@ function PageEditor({
       {/* ── Content Area ── */}
       <div
         ref={contentRef}
-        className="absolute left-0 right-0 z-0 overflow-hidden px-[25.4mm]"
+        className="relative z-0 flex-1 overflow-hidden px-[25.4mm]"
         style={{
-          top: "30mm",
-          bottom: "30mm",
           fontFamily: "Arial, sans-serif",
           fontSize: "11pt",
           lineHeight: 1.6,
@@ -289,6 +291,7 @@ export function DocsCanvas({ initialContent, onReady, onChange, onFocus }: DocsC
   // Each page has its own content JSON
   const [pages, setPages] = useState<(TipTapDoc | null)[]>([initialContent]);
   const editorsRef = useRef<{ [pageIndex: number]: any }>({});
+  const rebalancingRef = useRef(false);
 
   const removePage = useCallback((pageIndex: number) => {
     if (pageIndex <= 0) return;
@@ -324,26 +327,30 @@ export function DocsCanvas({ initialContent, onReady, onChange, onFocus }: DocsC
   }, [onReady]);
 
   const handleChange = useCallback((pageIndex: number, json: any) => {
-    if (pageIndex > 0 && isDocEffectivelyEmpty(json)) {
-      removePage(pageIndex);
-      return;
-    }
-
     if (pageIndex === 0) onChange(json);
-  }, [onChange, removePage]);
+  }, [onChange]);
 
   const handleOverflow = useCallback((pageIndex: number, overflowNodes: any[], focusNext: boolean) => {
-    setPages(prev => {
-      const next = [...prev];
-      const overflowDoc: TipTapDoc = { type: "doc", content: overflowNodes };
-      if (next[pageIndex + 1]) {
-        const existingContent = (next[pageIndex + 1] as any)?.content ?? [];
-        next[pageIndex + 1] = { type: "doc", content: [...overflowNodes, ...existingContent] } as any;
-      } else {
-        next.push(overflowDoc as any);
+    const nextEditor = editorsRef.current[pageIndex + 1];
+
+    if (nextEditor) {
+      // Important: when next page is already mounted, update its live editor state directly.
+      // Updating only React state here can drop/misplace content because TipTap doesn't remount on prop change.
+      const existing = nextEditor.getJSON?.() as any;
+      const existingContent = existing?.content ?? [];
+      try {
+        nextEditor.commands.setContent({ type: "doc", content: [...overflowNodes, ...existingContent] }, false);
+      } catch {
+        return;
       }
-      return next;
-    });
+    } else {
+      setPages(prev => {
+        const next = [...prev];
+        const overflowDoc: TipTapDoc = { type: "doc", content: overflowNodes };
+        next.push(overflowDoc as any);
+        return next;
+      });
+    }
 
     if (focusNext) {
       // After next render, focus the next page's editor and move cursor to its start
@@ -358,9 +365,49 @@ export function DocsCanvas({ initialContent, onReady, onChange, onFocus }: DocsC
     }
   }, [onFocus]);
 
-  const handleUnderflow = useCallback((pageIndex: number) => {
-    removePage(pageIndex);
+  const pullFromNextPage = useCallback((pageIndex: number) => {
+    if (rebalancingRef.current) return;
+    const currentEditor = editorsRef.current[pageIndex];
+    const nextEditor = editorsRef.current[pageIndex + 1];
+    if (!currentEditor || !nextEditor) return;
+
+    const nextDoc = nextEditor.state.doc;
+    if (nextDoc.childCount === 0) {
+      removePage(pageIndex + 1);
+      return;
+    }
+
+    const firstNode = nextDoc.child(0);
+    if (!firstNode) return;
+
+    rebalancingRef.current = true;
+    try {
+      currentEditor.chain().focus().insertContent(firstNode.toJSON()).run();
+
+      const tr = nextEditor.state.tr;
+      tr.delete(0, firstNode.nodeSize);
+      nextEditor.view.dispatch(tr);
+    } catch {
+      // Ignore if either editor is tearing down due to page remount.
+    } finally {
+      setTimeout(() => {
+        rebalancingRef.current = false;
+      }, 0);
+    }
+
+    const nextJson = nextEditor.getJSON?.();
+    if (isDocEffectivelyEmpty(nextJson)) {
+      removePage(pageIndex + 1);
+    }
   }, [removePage]);
+
+  const handleUnderflow = useCallback((pageIndex: number, isEmpty: boolean) => {
+    if (isEmpty) {
+      removePage(pageIndex);
+      return;
+    }
+    pullFromNextPage(pageIndex);
+  }, [pullFromNextPage, removePage]);
 
   // Register print hooks — traverse up from docs-print-root and hide all sibling elements
   useEffect(() => {
@@ -469,7 +516,9 @@ export function DocsCanvas({ initialContent, onReady, onChange, onFocus }: DocsC
           }
         }
 
-        .ProseMirror { outline: none; min-height: 60px; }
+        .ProseMirror { outline: none; min-height: 60px; padding-top: 1px; box-sizing: border-box; }
+        .ProseMirror > :first-child { margin-top: 0 !important; }
+        .ProseMirror > :last-child { margin-bottom: 0 !important; }
         .ProseMirror p { margin: 0; min-height: 1.6em; }
         .ProseMirror h1 { font-size: 26pt; font-weight: normal; margin: 16pt 0 6pt; }
         .ProseMirror h2 { font-size: 20pt; font-weight: normal; margin: 14pt 0 4pt; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; }
