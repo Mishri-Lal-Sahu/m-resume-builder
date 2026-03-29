@@ -1,0 +1,7 @@
+{
+  "key": "ats",
+  "name": "ATS Friendly",
+  "description": "Plain, scanner-friendly format optimized for ATS parsing.",
+  "atsFriendly": true,
+  "defaultFont": "mono"
+}

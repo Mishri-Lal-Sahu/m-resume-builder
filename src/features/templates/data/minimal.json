@@ -1,0 +1,7 @@
+{
+  "key": "minimal",
+  "name": "Minimal",
+  "description": "Lightweight layout with clean spacing and simple typography.",
+  "atsFriendly": true,
+  "defaultFont": "sans"
+}

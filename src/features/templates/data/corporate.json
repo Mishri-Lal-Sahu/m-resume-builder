@@ -1,0 +1,7 @@
+{
+  "key": "corporate",
+  "name": "Corporate",
+  "description": "Executive-style card layout with side information rail.",
+  "atsFriendly": true,
+  "defaultFont": "serif"
+}
