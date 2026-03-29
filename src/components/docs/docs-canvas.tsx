@@ -72,7 +72,7 @@ const PAGE_WIDTH_PX = 794; // 210mm
 const PAGE_HEIGHT_PX = 1123; // 297mm
 // Header + footer zones are fixed at 30mm each. Usable content height is ~237mm (about 897px at 96dpi).
 const PRINTABLE_HEIGHT_PX = 897;
-const SPLIT_SAFETY_PX = 6;
+const SPLIT_SAFETY_PX = 20;
 
 function isDocEffectivelyEmpty(docJson: any): boolean {
   if (!docJson || typeof docJson !== "object") return true;
@@ -163,7 +163,9 @@ function PageEditor({
         });
         const isEffectivelyEmpty = plainText.length === 0 && !hasMeaningfulNode;
 
-        if (contentHeight > PRINTABLE_HEIGHT_PX) {
+        const splitLimit = PRINTABLE_HEIGHT_PX - SPLIT_SAFETY_PX;
+
+        if (contentHeight > splitLimit) {
           let runningHeight = 0;
           let splitPos = -1;
           const children = proseMirrorDiv.children;
@@ -171,7 +173,7 @@ function PageEditor({
           doc.forEach((_node, _offset, i) => {
             if (idx < children.length) {
               const childH = (children[idx] as HTMLElement).offsetHeight;
-              if (runningHeight + childH > PRINTABLE_HEIGHT_PX && splitPos === -1) {
+              if (runningHeight + childH > splitLimit && splitPos === -1) {
                 splitPos = i;
               }
               runningHeight += childH;
