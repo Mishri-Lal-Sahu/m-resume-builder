@@ -8,6 +8,7 @@ import { Navbar, Footer } from "@/components/layout/Shell";
 export const metadata: Metadata = {
   title: "M-Docs — Smart Document Editor",
   description: "The smart, advanced document editor.",
+  generator: "M-Docs",
 };
 
 export default function RootLayout({

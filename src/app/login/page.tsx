@@ -12,14 +12,14 @@ import {
 function LoginFormInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl   = searchParams.get("callbackUrl") ?? "/dashboard";
-  const justVerified  = searchParams.get("verified") === "1";
-  const justReset     = searchParams.get("reset")    === "1";
+  const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
+  const justVerified = searchParams.get("verified") === "1";
+  const justReset = searchParams.get("reset") === "1";
 
-  const [email, setEmail]       = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError]       = useState<string | null>(null);
-  const [loading, setLoading]   = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -38,7 +38,7 @@ function LoginFormInner() {
   return (
     <AuthLayout>
       {justVerified && <AuthAlert variant="success" >✓ Email verified! You can now sign in.</AuthAlert>}
-      {justReset    && <AuthAlert variant="info">✓ Password updated. Sign in with your new password.</AuthAlert>}
+      {justReset && <AuthAlert variant="info">✓ Password updated. Sign in with your new password.</AuthAlert>}
       <div className={justVerified || justReset ? "mt-4" : ""}>
         <AuthHeading>Welcome back</AuthHeading>
         <AuthSubtext>Sign in to your M-Docs account.</AuthSubtext>
@@ -64,9 +64,6 @@ function LoginFormInner() {
       <p className="text-center text-sm" style={{ color: "var(--text-secondary)" }}>
         No account?{" "}
         <Link href="/signup" className="font-semibold text-indigo-500 hover:text-indigo-400 transition">Create one free</Link>
-      </p>
-      <p className="mt-2 text-center text-xs" style={{ color: "var(--text-muted)" }}>
-        <Link href="/admin/login" className="hover:underline transition" style={{ color: "var(--text-muted)" }}>Admin login →</Link>
       </p>
     </AuthLayout>
   );

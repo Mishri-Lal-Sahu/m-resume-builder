@@ -41,7 +41,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
 
     return NextResponse.json({ photoUrl }, { status: 200 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Upload failed";
-    return NextResponse.json({ message }, { status: 400 });
+    console.error("[photo upload error]", error);
+    return NextResponse.json({ message: "Upload failed" }, { status: 400 });
   }
 }

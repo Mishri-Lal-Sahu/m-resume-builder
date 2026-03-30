@@ -90,7 +90,7 @@ export default async function DashboardPage() {
         {/* ── Main content ── */}
         <main className="flex flex-1 flex-col overflow-auto">
           {/* Top bar */}
-          <header className="flex h-16 items-center justify-between border-b px-5 backdrop-blur-md md:px-8 transition-colors" style={{ background: "var(--sidebar-bg)", borderColor: "var(--sidebar-border)" }}>
+          <header className="relative z-50 flex h-16 shrink-0 items-center justify-between border-b px-5 backdrop-blur-md md:px-8 transition-colors" style={{ background: "var(--sidebar-bg)", borderColor: "var(--sidebar-border)" }}>
             {/* Mobile logo */}
             <div className="flex items-center gap-2 md:hidden">
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600">

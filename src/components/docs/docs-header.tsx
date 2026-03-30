@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SaveStatus } from "./docs-builder";
 import type { Editor } from "@tiptap/react";
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { ADVANCED_TEMPLATES } from "@/features/resumes/templates";
 import { exportDocxAction } from "@/features/export/docx-action";
 
@@ -312,14 +313,15 @@ export function DocsHeader({ title, editor, onTitleChange, status }: Props) {
       </div>
 
       {/* Templates Modal */}
-      {showTemplates && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 print:hidden">
+      {showTemplates && typeof document !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 print:hidden">
           <div className="w-full max-w-5xl h-[80vh] flex flex-col rounded-xl bg-white dark:bg-zinc-900 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-zinc-200 dark:border-zinc-800">
             <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 px-6 py-4 relative z-10">
               <h2 className="text-xl font-bold tracking-tight">Template Gallery</h2>
               <button
                 onClick={() => setShowTemplates(false)}
                 className="rounded-full p-2 text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+                title="Close"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               </button>
@@ -327,7 +329,7 @@ export function DocsHeader({ title, editor, onTitleChange, status }: Props) {
 
             <div className="flex-1 overflow-y-auto p-6 bg-zinc-100/50 dark:bg-zinc-900/50">
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                {['Business', 'Product', 'Marketing', 'Project Management', 'Design', 'HR', 'Academic', 'Personal / Career'].map(category => {
+                {['Personal / Career', 'Business', 'Product', 'Marketing', 'Project Management', 'Design', 'HR', 'Academic'].map(category => {
                   const items = ADVANCED_TEMPLATES.filter(t => t.category === category);
                   if (items.length === 0) return null;
                   return (
@@ -359,7 +361,8 @@ export function DocsHeader({ title, editor, onTitleChange, status }: Props) {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </header>
   );

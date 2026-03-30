@@ -1,5 +1,33 @@
 export const ADVANCED_TEMPLATES = [
   {
+    category: "Personal / Career",
+    id: "demo_resume",
+    name: "Full Demo Resume",
+    html: `
+      <h1 style="text-align: center;">Mishri Lal Sahu</h1>
+      <p style="text-align: center; color: #666;">Software Engineer & Web Developer | Contact: mishri@example.com</p>
+      <hr>
+      <h2>Professional Summary</h2>
+      <p>Hardworking software developer with experience in building scalable web applications. Passionate about learning new technologies and creating efficient solutions.</p>
+      <h2>Experience</h2>
+      <ul data-type="taskList">
+        <li data-type="taskItem" data-checked="true"><p>Built full-stack React applications</p></li>
+        <li data-type="taskItem" data-checked="true"><p>Designed RESTful APIs using Node.js</p></li>
+      </ul>
+      <h2>Key Skills</h2>
+      <table>
+        <tr>
+          <th style="background-color: #f3f4f6;">Frontend</th>
+          <th style="background-color: #f3f4f6;">Backend</th>
+        </tr>
+        <tr>
+          <td>React, Next.js, HTML, CSS</td>
+          <td>Node.js, Express, PostgreSQL</td>
+        </tr>
+      </table><p></p>
+    `,
+  },
+  {
     category: "Business",
     id: "invoice",
     name: "Sales Invoice",
