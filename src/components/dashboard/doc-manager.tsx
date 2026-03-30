@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LimitModal } from "@/components/ui/limit-modal";
+import { ImportWizardModal } from "./import-wizard-modal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -191,6 +192,7 @@ export function DocManager({ initialResumes }: DocManagerProps) {
     current: number;
     message: string;
   }>({ open: false, limit: 10, current: 0, message: "" });
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   const createDoc = async () => {
     setCreating(true);
@@ -251,6 +253,14 @@ export function DocManager({ initialResumes }: DocManagerProps) {
         current={limitModal.current}
         message={limitModal.message}
       />
+      <ImportWizardModal
+        open={wizardOpen}
+        onClose={() => setWizardOpen(false)}
+        onBlankSubmit={() => {
+          setWizardOpen(false);
+          createDoc();
+        }}
+      />
       {/* ─ Header ─ */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -261,7 +271,7 @@ export function DocManager({ initialResumes }: DocManagerProps) {
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            onClick={createDoc}
+            onClick={() => setWizardOpen(true)}
             disabled={creating}
             className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:bg-indigo-500 disabled:opacity-50"
           >
@@ -293,7 +303,7 @@ export function DocManager({ initialResumes }: DocManagerProps) {
         </AnimatePresence>
 
         {docs.length === 0 && !creating && (
-          <EmptyState onCreate={createDoc} creating={creating} />
+          <EmptyState onCreate={() => setWizardOpen(true)} creating={creating} />
         )}
       </div>
     </div>

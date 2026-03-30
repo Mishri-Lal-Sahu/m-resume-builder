@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SaveStatus } from "./docs-builder";
 import type { Editor } from "@tiptap/react";
+import type { TipTapDoc } from "@/features/resumes/tiptap-bridge";
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { ADVANCED_TEMPLATES } from "@/features/resumes/templates";
@@ -11,6 +12,7 @@ type Props = {
   editor: Editor | null;
   onTitleChange: (v: string) => void;
   status: SaveStatus;
+  getAllPages?: () => TipTapDoc[];
 };
 
 // --- Custom Minimal Dropdown System ---
@@ -71,7 +73,7 @@ function MenuDivider() {
 }
 // --------------------------------------
 
-export function DocsHeader({ title, editor, onTitleChange, status }: Props) {
+export function DocsHeader({ title, editor, onTitleChange, status, getAllPages }: Props) {
   const [showTemplates, setShowTemplates] = useState(false);
 
   return (
@@ -127,7 +129,9 @@ export function DocsHeader({ title, editor, onTitleChange, status }: Props) {
             <MenuItem label="PDF Document (.pdf)" onClick={() => window.print()} />
             <MenuItem label="Microsoft Word (.docx)" onClick={async () => {
               if (!editor) return;
-              const res = await exportDocxAction(title, editor.getJSON() as any);
+              const allContent = getAllPages ? getAllPages() : [editor.getJSON() as any];
+              const mergedDoc: TipTapDoc = { type: "doc", content: allContent.flatMap(p => p.content || []) };
+              const res = await exportDocxAction(title, mergedDoc);
               if (res.error) {
                 alert(res.error);
                 return;

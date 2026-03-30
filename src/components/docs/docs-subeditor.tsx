@@ -64,7 +64,7 @@ export function DocsSubEditor({ content, onChange, placeholder, onFocus }: SubEd
       )}
       <EditorContent editor={editor} className="w-full relative z-10" />
       {editor && editor.isEmpty && !editor.isFocused && (
-        <div className="absolute inset-0 pointer-events-none text-zinc-300 italic">{placeholder}</div>
+        <div className="absolute inset-0 pointer-events-none text-zinc-300 italic print:hidden">{placeholder}</div>
       )}
     </div>
   );

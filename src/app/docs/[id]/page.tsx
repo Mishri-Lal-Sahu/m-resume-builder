@@ -25,6 +25,7 @@ export default async function DocsPage({ params }: { params: Promise<{ id: strin
   }
 
   let initialTipTapJson: TipTapDoc | null = null;
+  let initialPages: TipTapDoc[] | undefined;
   let initialHeader: string | undefined;
   let initialFooter: string | undefined;
 
@@ -33,9 +34,10 @@ export default async function DocsPage({ params }: { params: Promise<{ id: strin
 
     if (raw.type === "mdocs-document") {
       // ── New format: header + footer + multi-page content ──
-      initialTipTapJson = Array.isArray(raw.pages) && raw.pages.length > 0
-        ? (raw.pages[0] as TipTapDoc)
-        : null;
+      if (Array.isArray(raw.pages) && raw.pages.length > 0) {
+        initialPages = raw.pages as TipTapDoc[];
+        initialTipTapJson = raw.pages[0] as TipTapDoc;
+      }
       initialHeader = typeof raw.header === "string" ? raw.header : undefined;
       initialFooter = typeof raw.footer === "string" ? raw.footer : undefined;
 
@@ -58,6 +60,7 @@ export default async function DocsPage({ params }: { params: Promise<{ id: strin
       resumeId={resume.id}
       initialTitle={resume.title}
       initialContent={initialTipTapJson}
+      initialPages={initialPages}
       initialHeader={initialHeader}
       initialFooter={initialFooter}
     />

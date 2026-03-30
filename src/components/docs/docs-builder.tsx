@@ -19,13 +19,14 @@ type DocsBuilderProps = {
   resumeId: string;
   initialTitle: string;
   initialContent: TipTapDoc | null;
+  initialPages?: TipTapDoc[];
   initialHeader?: string;
   initialFooter?: string;
 };
 
 export type SaveStatus = "idle" | "saving" | "saved" | "error";
 
-export function DocsBuilder({ resumeId, initialTitle, initialContent, initialHeader, initialFooter }: DocsBuilderProps) {
+export function DocsBuilder({ resumeId, initialTitle, initialContent, initialPages, initialHeader, initialFooter }: DocsBuilderProps) {
   const [title, setTitle] = useState(initialTitle);
   const [status, setStatus] = useState<SaveStatus>("idle");
   const [editorInstance, setEditorInstance] = useState<any>(null);
@@ -95,6 +96,7 @@ export function DocsBuilder({ resumeId, initialTitle, initialContent, initialHea
         <DocsHeader
           title={title}
           editor={activeMainEditor || editorInstance}
+          getAllPages={() => lastPagesRef.current}
           onTitleChange={(t: string) => {
             setTitle(t);
             // Immediate save for title change, using the last known header/footer/pages
@@ -205,6 +207,7 @@ export function DocsBuilder({ resumeId, initialTitle, initialContent, initialHea
           >
             <DocsCanvas
               initialContent={initialContent}
+              initialPages={initialPages}
               initialHeader={initialHeader}
               initialFooter={initialFooter}
               onReady={(e: any) => {

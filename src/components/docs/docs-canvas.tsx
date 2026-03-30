@@ -234,7 +234,7 @@ function PageEditor({
     >
       {/* ── Header ── */}
       <div
-        className="z-10 box-border flex h-[30mm] shrink-0 items-center border-b border-zinc-100 bg-white px-[25.4mm] py-[6mm] dark:border-zinc-800 dark:bg-zinc-900"
+        className="z-10 box-border flex h-[30mm] shrink-0 items-center border-b border-zinc-100 bg-white px-[25.4mm] py-[6mm] dark:border-zinc-800 dark:bg-zinc-900 print:border-none"
       >
         <DocsSubEditor
           content={headerContent}
@@ -261,7 +261,7 @@ function PageEditor({
 
       {/* ── Footer ── */}
       <div
-        className="absolute bottom-0 left-0 right-0 z-10 box-border flex h-[30mm] items-center gap-4 border-t border-zinc-100 bg-white px-[25.4mm] py-[6mm] dark:border-zinc-800 dark:bg-zinc-900"
+        className="absolute bottom-0 left-0 right-0 z-10 box-border flex h-[30mm] items-center gap-4 border-t border-zinc-100 bg-white px-[25.4mm] py-[6mm] dark:border-zinc-800 dark:bg-zinc-900 print:border-none"
       >
         <div className="flex-1">
           <DocsSubEditor
@@ -282,6 +282,7 @@ function PageEditor({
 // ---------- Doc Canvas ----------
 type DocsCanvasProps = {
   initialContent: TipTapDoc | null;
+  initialPages?: TipTapDoc[];
   initialHeader?: string;
   initialFooter?: string;
   onReady: (editor: any) => void;
@@ -290,18 +291,20 @@ type DocsCanvasProps = {
   onFocus?: (editor: any) => void;
 };
 
-export function DocsCanvas({ initialContent, initialHeader, initialFooter, onReady, onChange, onFocus }: DocsCanvasProps) {
+export function DocsCanvas({ initialContent, initialPages, initialHeader, initialFooter, onReady, onChange, onFocus }: DocsCanvasProps) {
   // ── State (for rendering) ─────────────────────────────────────────────────
   const [headerContent, setHeaderContentState] = useState(initialHeader ?? "<p></p>");
   const [footerContent, setFooterContentState] = useState(initialFooter ?? "<p></p>");
-  const [pages, setPages] = useState<(TipTapDoc | null)[]>([initialContent]);
+  // If initialPages has multiple pages, use them; otherwise fall back to single initialContent
+  const seedPages = initialPages && initialPages.length > 0 ? initialPages : [initialContent];
+  const [pages, setPages] = useState<(TipTapDoc | null)[]>(seedPages);
 
   // ── Refs (stale-closure-safe values for callbacks) ────────────────────────
   const editorsRef = useRef<{ [pageIndex: number]: any }>({});
   const rebalancingRef = useRef(false);
   const headerRef = useRef(initialHeader ?? "<p></p>");
   const footerRef = useRef(initialFooter ?? "<p></p>");
-  const pagesContentRef = useRef<(TipTapDoc | null)[]>([initialContent]);
+  const pagesContentRef = useRef<(TipTapDoc | null)[]>(seedPages);
 
   const [maxPages, setMaxPages] = useState<number>(50);
   const [pageLimitModal, setPageLimitModal] = useState(false);
@@ -590,6 +593,14 @@ export function DocsCanvas({ initialContent, initialHeader, initialFooter, onRea
           .docs-page-box .ProseMirror {
             overflow: visible !important;
             height: auto !important;
+          }
+
+          .ProseMirror p.is-editor-empty:first-child::before,
+          .ProseMirror p.is-empty::before,
+          .ProseMirror [data-placeholder]::before {
+            display: none !important;
+            content: none !important;
+            color: transparent !important;
           }
         }
 
