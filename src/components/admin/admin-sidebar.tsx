@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { SidebarLogout } from "@/components/ui/sidebar-logout";
+import { AdminLogout } from "@/components/admin/admin-logout";
 
 const navItems = [
   {
@@ -106,7 +106,7 @@ export function AdminSidebar({ name, email }: { name: string; email: string }) {
           </div>
         </div>
 
-        <SidebarLogout />
+        <AdminLogout />
       </div>
     </aside>
   );

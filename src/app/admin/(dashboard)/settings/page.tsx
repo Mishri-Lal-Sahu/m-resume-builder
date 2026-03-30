@@ -1,25 +1,33 @@
-import { getAuthSession } from "@/lib/server/auth";
-import { AdminSettingsForm } from "@/components/admin/settings-form";
+import { getAdminSession } from "@/lib/server/admin-auth";
+import { getAdminSettings } from "@/lib/server/settings";
+import { AdminSettingsTabs } from "@/components/admin/settings-tabs";
 
+export const dynamic = "force-dynamic";
 export const metadata = { title: "Admin Settings | M-Docs" };
 
 export default async function AdminSettingsPage() {
-  const session = await getAuthSession();
+  const [admin, platformSettings] = await Promise.all([
+    getAdminSession(),
+    getAdminSettings(),
+  ]);
 
   return (
-    <div className="max-w-2xl space-y-8">
+    <div className="max-w-3xl space-y-8">
       <div>
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl transition-colors" style={{ color: "var(--text-primary)" }}>
-          Profile Settings
+          Admin Settings
         </h1>
         <p className="mt-1 text-sm transition-colors" style={{ color: "var(--text-muted)" }}>
-          Manage your administrator account details and security.
+          Manage your profile, security, and global platform configuration.
         </p>
       </div>
 
-      <div className="rounded-2xl border p-6 transition-colors shadow-sm" style={{ borderColor: "var(--card-border)", background: "var(--card-bg)" }}>
-        <AdminSettingsForm initialName={session?.user.name ?? ""} email={session?.user.email ?? ""} />
-      </div>
+      <AdminSettingsTabs
+        initialName={admin?.name ?? ""}
+        email={admin?.email ?? ""}
+        platformSettings={platformSettings}
+      />
     </div>
   );
 }
+

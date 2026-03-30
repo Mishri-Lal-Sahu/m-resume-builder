@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { LimitModal } from "@/components/ui/limit-modal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -184,14 +185,29 @@ export function DocManager({ initialResumes }: DocManagerProps) {
   const [docs, setDocs] = useState<Doc[]>(initialResumes);
   const [creating, setCreating] = useState(false);
   const router = useRouter();
+  const [limitModal, setLimitModal] = useState<{
+    open: boolean;
+    limit: number;
+    current: number;
+    message: string;
+  }>({ open: false, limit: 10, current: 0, message: "" });
 
   const createDoc = async () => {
     setCreating(true);
     try {
       const resp = await fetch("/api/resumes", { method: "POST" });
+      const data = await resp.json();
+      if (resp.status === 403 && data.limitType === "documents") {
+        setLimitModal({
+          open: true,
+          limit: data.limit,
+          current: data.current,
+          message: data.message,
+        });
+        return;
+      }
       if (resp.ok) {
-        const { resume } = await resp.json();
-        router.push(`/docs/${resume.id}`);
+        router.push(`/docs/${data.resume.id}`);
       }
     } finally {
       setCreating(false);
@@ -227,6 +243,14 @@ export function DocManager({ initialResumes }: DocManagerProps) {
 
   return (
     <div className="space-y-8">
+      <LimitModal
+        open={limitModal.open}
+        onClose={() => setLimitModal((s) => ({ ...s, open: false }))}
+        limitType="documents"
+        limit={limitModal.limit}
+        current={limitModal.current}
+        message={limitModal.message}
+      />
       {/* ─ Header ─ */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>

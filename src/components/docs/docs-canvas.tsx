@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { LimitModal } from "@/components/ui/limit-modal";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
@@ -281,19 +282,67 @@ function PageEditor({
 // ---------- Doc Canvas ----------
 type DocsCanvasProps = {
   initialContent: TipTapDoc | null;
+  initialHeader?: string;
+  initialFooter?: string;
   onReady: (editor: any) => void;
-  onChange: (json: TipTapDoc) => void;
+  /** Called whenever header, footer, or any page changes. */
+  onChange: (header: string, footer: string, pages: TipTapDoc[]) => void;
   onFocus?: (editor: any) => void;
 };
 
-export function DocsCanvas({ initialContent, onReady, onChange, onFocus }: DocsCanvasProps) {
-  const [headerContent, setHeaderContent] = useState("<p></p>");
-  const [footerContent, setFooterContent] = useState("<p></p>");
-
-  // Each page has its own content JSON
+export function DocsCanvas({ initialContent, initialHeader, initialFooter, onReady, onChange, onFocus }: DocsCanvasProps) {
+  // ── State (for rendering) ─────────────────────────────────────────────────
+  const [headerContent, setHeaderContentState] = useState(initialHeader ?? "<p></p>");
+  const [footerContent, setFooterContentState] = useState(initialFooter ?? "<p></p>");
   const [pages, setPages] = useState<(TipTapDoc | null)[]>([initialContent]);
+
+  // ── Refs (stale-closure-safe values for callbacks) ────────────────────────
   const editorsRef = useRef<{ [pageIndex: number]: any }>({});
   const rebalancingRef = useRef(false);
+  const headerRef = useRef(initialHeader ?? "<p></p>");
+  const footerRef = useRef(initialFooter ?? "<p></p>");
+  const pagesContentRef = useRef<(TipTapDoc | null)[]>([initialContent]);
+
+  const [maxPages, setMaxPages] = useState<number>(50);
+  const [pageLimitModal, setPageLimitModal] = useState(false);
+
+  // Fetch the admin-configured page limit
+  useEffect(() => {
+    fetch("/api/settings/limits")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.maxPagesPerDoc) setMaxPages(data.maxPagesPerDoc);
+      })
+      .catch(() => {});
+  }, []);
+
+  /** Collect all current page JSONs from live editors (preferred) or cached ref */
+  const collectAllPages = useCallback((): TipTapDoc[] => {
+    const result: TipTapDoc[] = [];
+    const count = pagesContentRef.current.length;
+    for (let i = 0; i < count; i++) {
+      const editor = editorsRef.current[i];
+      if (editor) {
+        result.push(editor.getJSON() as TipTapDoc);
+      } else if (pagesContentRef.current[i]) {
+        result.push(pagesContentRef.current[i] as TipTapDoc);
+      }
+    }
+    return result;
+  }, []);
+
+  /** Header/footer setters — update both state (render) and ref (callbacks), trigger save */
+  const setHeaderContent = useCallback((html: string) => {
+    headerRef.current = html;
+    setHeaderContentState(html);
+    onChange(html, footerRef.current, collectAllPages());
+  }, [onChange, collectAllPages]);
+
+  const setFooterContent = useCallback((html: string) => {
+    footerRef.current = html;
+    setFooterContentState(html);
+    onChange(headerRef.current, html, collectAllPages());
+  }, [onChange, collectAllPages]);
 
   const removePage = useCallback((pageIndex: number) => {
     if (pageIndex <= 0) return;
@@ -302,6 +351,7 @@ export function DocsCanvas({ initialContent, onReady, onChange, onFocus }: DocsC
       if (prev.length <= 1 || pageIndex >= prev.length) return prev;
       const next = [...prev];
       next.splice(pageIndex, 1);
+      pagesContentRef.current = next;
       return next;
     });
 
@@ -328,16 +378,16 @@ export function DocsCanvas({ initialContent, onReady, onChange, onFocus }: DocsC
     if (pageIndex === 0) onReady(editor);
   }, [onReady]);
 
+  /** Called whenever any page editor changes — saves ALL pages + header + footer */
   const handleChange = useCallback((pageIndex: number, json: any) => {
-    if (pageIndex === 0) onChange(json);
-  }, [onChange]);
+    pagesContentRef.current[pageIndex] = json;
+    onChange(headerRef.current, footerRef.current, collectAllPages());
+  }, [onChange, collectAllPages]);
 
   const handleOverflow = useCallback((pageIndex: number, overflowNodes: any[], focusNext: boolean) => {
     const nextEditor = editorsRef.current[pageIndex + 1];
 
     if (nextEditor) {
-      // Important: when next page is already mounted, update its live editor state directly.
-      // Updating only React state here can drop/misplace content because TipTap doesn't remount on prop change.
       const existing = nextEditor.getJSON?.() as any;
       const existingContent = existing?.content ?? [];
       try {
@@ -346,6 +396,23 @@ export function DocsCanvas({ initialContent, onReady, onChange, onFocus }: DocsC
         return;
       }
     } else {
+      // Check page limit before creating a new page
+      if (pages.length >= maxPages) {
+        setPageLimitModal(true);
+        // Put the overflow nodes back into the current editor to prevent data loss
+        const currentEditor = editorsRef.current[pageIndex];
+        if (currentEditor) {
+          try {
+            const currentJson = currentEditor.getJSON?.() as any;
+            const currentContent = currentJson?.content ?? [];
+            currentEditor.commands.setContent(
+              { type: "doc", content: [...currentContent, ...overflowNodes] },
+              false,
+            );
+          } catch { /* ignore */ }
+        }
+        return;
+      }
       setPages(prev => {
         const next = [...prev];
         const overflowDoc: TipTapDoc = { type: "doc", content: overflowNodes };
@@ -454,6 +521,14 @@ export function DocsCanvas({ initialContent, onReady, onChange, onFocus }: DocsC
 
   return (
     <div id="docs-print-root" className="relative w-full flex flex-col items-center gap-[24px] py-8 pb-32">
+      <LimitModal
+        open={pageLimitModal}
+        onClose={() => setPageLimitModal(false)}
+        limitType="pages"
+        limit={maxPages}
+        current={pages.length}
+        message={`This document has reached the maximum of ${maxPages} page${maxPages !== 1 ? "s" : ""}. Please remove content to continue, or contact your administrator to increase the page limit.`}
+      />
       {pages.map((pageContent, i) => (
         <PageEditor
           key={i}

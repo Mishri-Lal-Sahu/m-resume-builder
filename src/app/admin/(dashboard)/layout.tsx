@@ -1,25 +1,25 @@
 import { redirect } from "next/navigation";
 import { UserMenu } from "@/components/ui/user-menu";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
-import { getAuthSession } from "@/lib/server/auth";
+import { getAdminSession } from "@/lib/server/admin-auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
-  const session = await getAuthSession();
+  const admin = await getAdminSession();
 
-  if (!session || session.user.role !== "ADMIN") {
-    redirect("/dashboard"); // Non-admins are redirected back to the user dashboard
+  if (!admin) {
+    redirect("/admin/login");
   }
 
-  const name = session.user.name ?? session.user.email ?? "Admin";
+  const name = admin.name ?? admin.email ?? "Admin";
   const firstName = name.split(" ")[0];
 
   return (
     <div className="min-h-screen transition-colors duration-200" style={{ background: "var(--page-bg)" }}>
       <div className="flex min-h-screen">
         {/* Shared layout sidebar for all admin pages */}
-        <AdminSidebar name={name} email={session.user.email ?? ""} />
+        <AdminSidebar name={name} email={admin.email} />
 
         {/* Main Workspace */}
         <main className="flex flex-1 flex-col overflow-hidden">
@@ -51,3 +51,4 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
     </div>
   );
 }
+

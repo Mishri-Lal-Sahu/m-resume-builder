@@ -6,47 +6,79 @@ import { DocsHeader } from "./docs-header";
 import { DocsToolbar } from "./docs-toolbar";
 import { DocsCanvas } from "./docs-canvas";
 
+/** The full document blob saved into rawContent in the DB */
+export type MDocsDocument = {
+  type: "mdocs-document";
+  version: 1;
+  header: string;
+  footer: string;
+  pages: TipTapDoc[];
+};
+
 type DocsBuilderProps = {
   resumeId: string;
   initialTitle: string;
   initialContent: TipTapDoc | null;
+  initialHeader?: string;
+  initialFooter?: string;
 };
 
 export type SaveStatus = "idle" | "saving" | "saved" | "error";
 
-export function DocsBuilder({ resumeId, initialTitle, initialContent }: DocsBuilderProps) {
+export function DocsBuilder({ resumeId, initialTitle, initialContent, initialHeader, initialFooter }: DocsBuilderProps) {
   const [title, setTitle] = useState(initialTitle);
   const [status, setStatus] = useState<SaveStatus>("idle");
-  const [editorInstance, setEditorInstance] = useState<any>(null); // Main editor (for saving)
-  const [activeMainEditor, setActiveMainEditor] = useState<any>(null); // Focused page editor for toolbar/header actions
+  const [editorInstance, setEditorInstance] = useState<any>(null);
+  const [activeMainEditor, setActiveMainEditor] = useState<any>(null);
   const [zoom, setZoom] = useState(1);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Keep latest header/footer/pages in refs so title-change saves include them
+  const lastHeaderRef = useRef(initialHeader ?? "<p></p>");
+  const lastFooterRef = useRef(initialFooter ?? "<p></p>");
+  const lastPagesRef = useRef<TipTapDoc[]>([]);
 
-  const handleSave = useCallback(async (newTitle: string, rawContent: TipTapDoc) => {
-    setStatus("saving");
-    try {
-      const res = await fetch(`/api/resumes/${resumeId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: newTitle, rawContent }),
-      });
-      if (!res.ok) throw new Error("Save failed");
-      setStatus("saved");
-      setTimeout(() => setStatus("idle"), 2000);
-    } catch (err) {
-      console.error(err);
-      setStatus("error");
-    }
-  }, [resumeId]);
+  const handleSave = useCallback(
+    async (newTitle: string, header: string, footer: string, pages: TipTapDoc[]) => {
+      setStatus("saving");
+      const rawContent: MDocsDocument = {
+        type: "mdocs-document",
+        version: 1,
+        header,
+        footer,
+        pages,
+      };
+      try {
+        const res = await fetch(`/api/resumes/${resumeId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: newTitle, rawContent }),
+        });
+        if (!res.ok) throw new Error("Save failed");
+        setStatus("saved");
+        setTimeout(() => setStatus("idle"), 2000);
+      } catch (err) {
+        console.error(err);
+        setStatus("error");
+      }
+    },
+    [resumeId],
+  );
 
-  const debouncedSave = useCallback((newTitle: string, rawContent: TipTapDoc) => {
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    setStatus("saving"); // Optimistically show saving indicator
-    saveTimerRef.current = setTimeout(() => {
-      handleSave(newTitle, rawContent);
-    }, 1500);
-  }, [handleSave]);
+  const debouncedSave = useCallback(
+    (newTitle: string, header: string, footer: string, pages: TipTapDoc[]) => {
+      // Always update the latest refs so title changes don't lose content
+      lastHeaderRef.current = header;
+      lastFooterRef.current = footer;
+      if (pages.length > 0) lastPagesRef.current = pages;
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      setStatus("saving");
+      saveTimerRef.current = setTimeout(() => {
+        handleSave(newTitle, header, footer, pages);
+      }, 1500);
+    },
+    [handleSave],
+  );
 
   const decreaseZoom = useCallback(() => {
     setZoom((z) => Math.max(0.5, Math.round((z - 0.1) * 10) / 10));
@@ -65,9 +97,9 @@ export function DocsBuilder({ resumeId, initialTitle, initialContent }: DocsBuil
           editor={activeMainEditor || editorInstance}
           onTitleChange={(t: string) => {
             setTitle(t);
-            if (editorInstance) {
-              handleSave(t, editorInstance.getJSON());
-            }
+            // Immediate save for title change, using the last known header/footer/pages
+            if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+            handleSave(t, lastHeaderRef.current, lastFooterRef.current, lastPagesRef.current);
           }}
           status={status}
         />
@@ -173,11 +205,13 @@ export function DocsBuilder({ resumeId, initialTitle, initialContent }: DocsBuil
           >
             <DocsCanvas
               initialContent={initialContent}
+              initialHeader={initialHeader}
+              initialFooter={initialFooter}
               onReady={(e: any) => {
                 setEditorInstance(e);
                 setActiveMainEditor(e);
               }}
-              onChange={(json: TipTapDoc) => debouncedSave(title, json)}
+              onChange={(header, footer, pages) => debouncedSave(title, header, footer, pages)}
               onFocus={setActiveMainEditor}
             />
           </div>

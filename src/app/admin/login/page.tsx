@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import {
@@ -18,11 +17,26 @@ export default function AdminLoginPage() {
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError(null); setLoading(true);
-    const result = await signIn("credentials", { email, password, redirect: false });
-    setLoading(false);
-    if (!result || result.error) { setError("Invalid credentials or account not verified."); return; }
-    router.push("/admin"); router.refresh();
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Invalid credentials.");
+        return;
+      }
+      router.push("/admin");
+      router.refresh();
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -35,16 +49,16 @@ export default function AdminLoginPage() {
       </div>
 
       <AuthHeading>Admin Login</AuthHeading>
-      <AuthSubtext>M-Docs administration panel</AuthSubtext>
+      <AuthSubtext>M-Docs administration panel — separate secure access</AuthSubtext>
 
       <form onSubmit={onSubmit} className="mt-5 space-y-4">
         <div className="space-y-1">
-          <AuthLabel htmlFor="email">Admin email</AuthLabel>
-          <AuthInput id="email" type="email" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@example.com" />
+          <AuthLabel htmlFor="admin-email">Admin email</AuthLabel>
+          <AuthInput id="admin-email" type="email" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@example.com" />
         </div>
         <div className="space-y-1">
-          <AuthLabel htmlFor="password">Password</AuthLabel>
-          <AuthInput id="password" type="password" required minLength={8} autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+          <AuthLabel htmlFor="admin-password">Password</AuthLabel>
+          <AuthInput id="admin-password" type="password" required minLength={8} autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
         </div>
         {error && <AuthAlert variant="error">{error}</AuthAlert>}
         <button
@@ -64,3 +78,4 @@ export default function AdminLoginPage() {
     </AuthLayout>
   );
 }
+

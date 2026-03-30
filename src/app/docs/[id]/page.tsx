@@ -16,29 +16,41 @@ export default async function DocsPage({ params }: { params: Promise<{ id: strin
 
   const { id } = await params;
   const resume = await db.resume.findFirst({
-    where: {
-      id,
-      userId: session.user.id,
-    },
-    select: {
-      id: true,
-      title: true,
-      content: true,
-      rawContent: true, // We will use this primarily, fallback to converting content
-    },
+    where: { id, userId: session.user.id },
+    select: { id: true, title: true, content: true, rawContent: true },
   });
 
   if (!resume) {
     notFound();
   }
 
-  // Use rawContent (saved from docs mode) if available.
-  // Otherwise, convert the old section-based content.
   let initialTipTapJson: TipTapDoc | null = null;
-  if (resume.rawContent && typeof resume.rawContent === "object" && (resume.rawContent as any).type === "doc") {
-    initialTipTapJson = resume.rawContent as unknown as TipTapDoc;
-  } else if (resume.content) {
-    initialTipTapJson = resumeToTipTap(resume.content as unknown as ResumeDocument, resume.title);
+  let initialHeader: string | undefined;
+  let initialFooter: string | undefined;
+
+  if (resume.rawContent && typeof resume.rawContent === "object") {
+    const raw = resume.rawContent as any;
+
+    if (raw.type === "mdocs-document") {
+      // ── New format: header + footer + multi-page content ──
+      initialTipTapJson = Array.isArray(raw.pages) && raw.pages.length > 0
+        ? (raw.pages[0] as TipTapDoc)
+        : null;
+      initialHeader = typeof raw.header === "string" ? raw.header : undefined;
+      initialFooter = typeof raw.footer === "string" ? raw.footer : undefined;
+
+    } else if (raw.type === "doc") {
+      // ── Legacy format: plain TipTap doc (no header/footer) ──
+      initialTipTapJson = raw as TipTapDoc;
+    }
+  }
+
+  // Final fallback: convert old section-based resume content
+  if (!initialTipTapJson && resume.content) {
+    initialTipTapJson = resumeToTipTap(
+      resume.content as unknown as ResumeDocument,
+      resume.title,
+    );
   }
 
   return (
@@ -46,6 +58,9 @@ export default async function DocsPage({ params }: { params: Promise<{ id: strin
       resumeId={resume.id}
       initialTitle={resume.title}
       initialContent={initialTipTapJson}
+      initialHeader={initialHeader}
+      initialFooter={initialFooter}
     />
   );
 }
+

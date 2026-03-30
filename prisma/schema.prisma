@@ -7,6 +7,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Separate Admin table (no shared session with User) ───
+model Admin {
+  id           String    @id @default(cuid())
+  name         String?
+  email        String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+// ─── Platform-wide settings (singleton, AES-256 encrypted sensitive fields) ───
+model AdminSettings {
+  id                      String   @id @default(cuid())
+  // SMTP config (smtpPassEncrypted stored as AES-256-GCM ciphertext:iv:authTag)
+  smtpHost                String?
+  smtpPort                Int?
+  smtpUser                String?
+  smtpPassEncrypted       String?  @db.Text
+  smtpFrom                String?
+  // User & document limits
+  maxDocsPerUser          Int      @default(10)
+  maxPagesPerDoc          Int      @default(50)
+  maxCollaboratorsPerDoc  Int      @default(5)
+  updatedAt               DateTime @updatedAt
+}
+
 model User {
   id            String        @id @default(cuid())
   name          String?
