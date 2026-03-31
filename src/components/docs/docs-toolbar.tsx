@@ -143,7 +143,7 @@ export function DocsToolbar({ editor }: { editor: Editor | null }) {
           onChange={(e) => {
             const v = e.target.value;
             if (v === "p") editor.chain().focus().setParagraph().run();
-            else editor.chain().focus().setHeading({ level: parseInt(v) as any }).run();
+            else editor.chain().focus().setHeading({ level: Number(v) as 1 | 2 | 3 | 4 | 5 | 6 }).run();
           }}
           className="h-7 w-28 rounded hover:bg-zinc-100 px-1.5 text-xs text-zinc-700 border-transparent bg-transparent outline-none dark:hover:bg-zinc-800 dark:text-zinc-300 font-medium cursor-pointer"
         >
@@ -211,6 +211,15 @@ export function DocsToolbar({ editor }: { editor: Editor | null }) {
         </Btn>
         <Btn active={editor.isActive("strike")} onClick={() => editor.chain().focus().toggleStrike().run()} title="Strikethrough">
           <span className="font-serif line-through text-[15px]">S</span>
+        </Btn>
+        <Btn active={editor.isActive("code")} onClick={() => editor.chain().focus().toggleCode().run()} title="Inline code">
+          <span className="font-mono text-[11px]">&lt;/&gt;</span>
+        </Btn>
+        <Btn active={editor.isActive("codeBlock")} onClick={() => editor.chain().focus().toggleCodeBlock().run()} title="Code block">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="16 18 22 12 16 6" />
+            <polyline points="8 6 2 12 8 18" />
+          </svg>
         </Btn>
 
         <Divider />

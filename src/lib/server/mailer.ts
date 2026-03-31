@@ -65,6 +65,39 @@ export function professionalOtpEmail(otp: string, action: string = "verification
   `;
 }
 
+export function professionalInvitationEmail(params: {
+  inviterName: string;
+  documentTitle: string;
+  acceptUrl: string;
+  expiresAt?: Date | null;
+}): string {
+  const expiryText = params.expiresAt
+    ? `This invitation expires on ${params.expiresAt.toLocaleString()}.`
+    : "This invitation does not expire.";
+
+  return `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 640px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 10px; background-color: #ffffff;">
+      <p style="margin: 0; color: #6b7280; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase;">M-Docs Collaboration</p>
+      <h2 style="margin: 10px 0 14px; color: #111827; font-size: 22px; line-height: 1.3;">You're invited to review a shared document</h2>
+      <p style="color: #374151; font-size: 15px; line-height: 1.6; margin: 0 0 14px;">
+        <strong>${params.inviterName}</strong> invited you to access <strong>${params.documentTitle}</strong> on M-Docs.
+      </p>
+      <p style="color: #4b5563; font-size: 14px; line-height: 1.5; margin: 0 0 18px;">
+        You will have view-only access. Editing and content changes are restricted.
+      </p>
+      <a href="${params.acceptUrl}" style="display: inline-block; background: #111827; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 10px 16px; border-radius: 8px;">
+        Accept Invitation
+      </a>
+      <p style="color: #6b7280; font-size: 13px; line-height: 1.5; margin: 16px 0 0;">
+        ${expiryText}
+      </p>
+      <p style="color: #9ca3af; font-size: 12px; line-height: 1.5; margin-top: 22px;">
+        If you weren't expecting this invitation, you can ignore this email safely.
+      </p>
+    </div>
+  `;
+}
+
 export async function sendMail(params: MailParams) {
   const config = await getSmtpConfig();
 

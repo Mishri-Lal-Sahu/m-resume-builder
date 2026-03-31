@@ -194,7 +194,7 @@ export function DocManager({ initialResumes }: DocManagerProps) {
   }>({ open: false, limit: 10, current: 0, message: "" });
   const [wizardOpen, setWizardOpen] = useState(false);
 
-  const createDoc = async (templateData?: { templateKey: string; rawContent?: any; htmlContent?: string; title?: string }) => {
+  const createDoc = async (templateData?: { templateKey: string; rawContent?: unknown; htmlContent?: string; title?: string }) => {
     setCreating(true);
     try {
       const resp = await fetch("/api/resumes", { 
@@ -314,7 +314,7 @@ export function DocManager({ initialResumes }: DocManagerProps) {
           <EmptyState onCreate={() => setWizardOpen(true)} creating={creating} />
         )}
       </div>
+
     </div>
   );
 }
-

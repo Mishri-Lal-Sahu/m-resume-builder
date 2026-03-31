@@ -1,7 +1,9 @@
 import { notFound, redirect } from "next/navigation";
 import { DocsBuilder } from "@/components/docs/docs-builder";
+import { PublicDocsViewer } from "@/components/docs/public-viewer";
 import { getAuthSession } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
+import { getDocAccess } from "@/lib/server/collaboration/helpers";
 import { ResumeDocument } from "@/features/resumes/types";
 import { resumeToTipTap } from "@/features/resumes/tiptap-bridge";
 import type { TipTapDoc } from "@/features/resumes/tiptap-bridge";
@@ -15,12 +17,24 @@ export default async function DocsPage({ params }: { params: Promise<{ id: strin
   }
 
   const { id } = await params;
-  const resume = await db.resume.findFirst({
-    where: { id, userId: session.user.id },
-    select: { id: true, title: true, content: true, rawContent: true },
+  const resume = await db.resume.findUnique({
+    where: { id },
+    select: { id: true, title: true, content: true, rawContent: true, userId: true },
   });
 
   if (!resume) {
+    notFound();
+  }
+
+  const access = await getDocAccess({
+    resumeId: id,
+    userId: session.user.id,
+    email: session.user.email,
+  });
+
+  console.info(`[docs-access] doc=${id} user=${session.user.id} reason=${access.reason}`);
+
+  if (!access.canRead) {
     notFound();
   }
 
@@ -30,7 +44,7 @@ export default async function DocsPage({ params }: { params: Promise<{ id: strin
   let initialFooter: string | undefined;
 
   if (resume.rawContent && typeof resume.rawContent === "object") {
-    const raw = resume.rawContent as any;
+    const raw = resume.rawContent as { type?: string; pages?: TipTapDoc[]; header?: string; footer?: string };
 
     if (raw.type === "mdocs-document") {
       // ── New format: header + footer + multi-page content ──
@@ -55,6 +69,16 @@ export default async function DocsPage({ params }: { params: Promise<{ id: strin
     );
   }
 
+  if (!access.isOwner) {
+    return (
+      <PublicDocsViewer
+        title={resume.title}
+        initialContent={initialTipTapJson ?? { type: "doc", content: [] }}
+        initialPages={initialPages}
+      />
+    );
+  }
+
   return (
     <DocsBuilder
       resumeId={resume.id}
@@ -66,4 +90,3 @@ export default async function DocsPage({ params }: { params: Promise<{ id: strin
     />
   );
 }
-

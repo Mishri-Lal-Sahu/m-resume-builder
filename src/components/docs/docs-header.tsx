@@ -6,8 +6,10 @@ import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { ADVANCED_TEMPLATES } from "@/features/resumes/templates";
 import { exportDocxAction } from "@/features/export/docx-action";
+import { DocsSharePanel } from "./docs-share-panel";
 
 type Props = {
+  resumeId: string;
   title: string;
   editor: Editor | null;
   onTitleChange: (v: string) => void;
@@ -73,7 +75,7 @@ function MenuDivider() {
 }
 // --------------------------------------
 
-export function DocsHeader({ title, editor, onTitleChange, status, getAllPages }: Props) {
+export function DocsHeader({ resumeId, title, editor, onTitleChange, status, getAllPages }: Props) {
   const [showTemplates, setShowTemplates] = useState(false);
 
   return (
@@ -293,6 +295,8 @@ export function DocsHeader({ title, editor, onTitleChange, status, getAllPages }
       </div>
 
       <div className="ml-auto flex items-center gap-3 print:hidden">
+        <DocsSharePanel resumeId={resumeId} />
+
         {/* Print / PDF */}
         <button onClick={() => window.print()} className="flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100 transition shadow-sm">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><rect width="12" height="8" x="6" y="14" /></svg>

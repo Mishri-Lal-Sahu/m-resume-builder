@@ -94,6 +94,7 @@ export function DocsBuilder({ resumeId, initialTitle, initialContent, initialPag
       {/* Chrome Header */}
       <div className="print:hidden">
         <DocsHeader
+          resumeId={resumeId}
           title={title}
           editor={activeMainEditor || editorInstance}
           getAllPages={() => lastPagesRef.current}
@@ -219,6 +220,7 @@ export function DocsBuilder({ resumeId, initialTitle, initialContent, initialPag
             />
           </div>
         </main>
+
       </div>
     </div>
   );
