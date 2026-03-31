@@ -614,8 +614,10 @@ export function DocsCanvas({ initialContent, initialPages, initialHeader, initia
         .ProseMirror h4 { font-size: 13pt; font-weight: bold; margin: 10pt 0 4pt; }
         .ProseMirror h5 { font-size: 11pt; font-weight: bold; margin: 10pt 0 2pt; }
         .ProseMirror h6 { font-size: 10pt; font-weight: bold; margin: 10pt 0 2pt; font-style: italic; }
-        .ProseMirror ul, .ProseMirror ol { padding-left: 1.5em; margin: 4pt 0; }
+        .ProseMirror ul { list-style-type: disc; padding-left: 1.5em; margin: 4pt 0; }
+        .ProseMirror ol { list-style-type: decimal; padding-left: 1.5em; margin: 4pt 0; }
         .ProseMirror li { margin: 1pt 0; }
+        .ProseMirror li p { margin: 0 !important; }
         .ProseMirror blockquote { border-left: 3px solid #c0c0c0; padding-left: 1em; color: #666; margin: 8pt 0; }
         .ProseMirror table { width: 100%; border-collapse: collapse; margin: 8pt 0; }
         .ProseMirror td, .ProseMirror th { border: 1px solid #d1d5db; padding: 6px 10px; min-width: 50px; vertical-align: top; }

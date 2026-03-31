@@ -142,8 +142,10 @@ export function PublicDocsViewer({ title, initialContent }: { title: string; ini
         .ProseMirror h1 { font-size: 26pt; font-weight: normal; margin: 16pt 0 6pt; }
         .ProseMirror h2 { font-size: 20pt; font-weight: normal; margin: 14pt 0 4pt; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; }
         .ProseMirror h3 { font-size: 16pt; font-weight: normal; margin: 12pt 0 4pt; color: #444; }
-        .ProseMirror ul, .ProseMirror ol { padding-left: 1.5em; margin: 4pt 0; }
-        .ProseMirror table { width: 100%; border-collapse: collapse; margin: 8pt 0; }
+        .ProseMirror ul { list-style-type: disc; padding-left: 1.5em; margin: 4pt 0; }
+        .ProseMirror ol { list-style-type: decimal; padding-left: 1.5em; margin: 4pt 0; }
+        .ProseMirror li { margin: 1pt 0; }
+        .ProseMirror li p { margin: 0 !important; }
         .ProseMirror td, .ProseMirror th { border: 1px solid #d1d5db; padding: 6px 10px; min-width: 50px; vertical-align: top; }
         .ProseMirror .task-list-item { display: flex; align-items: flex-start; gap: 8px; }
         
