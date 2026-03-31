@@ -4,16 +4,18 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { importDocumentAction } from "@/features/import/import-action";
 import { useRouter } from "next/navigation";
+import { ADVANCED_TEMPLATES } from "@/features/resumes/templates";
 
 type ImportWizardModalProps = {
   open: boolean;
   onClose: () => void;
-  onBlankSubmit: () => void; // Existing createDoc action
+  onBlankSubmit: () => void;
+  onTemplateSelect?: (template: typeof ADVANCED_TEMPLATES[0]) => void;
 };
 
-export function ImportWizardModal({ open, onClose, onBlankSubmit }: ImportWizardModalProps) {
+export function ImportWizardModal({ open, onClose, onBlankSubmit, onTemplateSelect }: ImportWizardModalProps) {
   const router = useRouter();
-  const [view, setView] = useState<"menu" | "import">("menu");
+  const [view, setView] = useState<"menu" | "import" | "templates">("menu");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
@@ -92,7 +94,7 @@ export function ImportWizardModal({ open, onClose, onBlankSubmit }: ImportWizard
 
           <div className="p-6">
             {view === "menu" && (
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-3">
                 <button
                   onClick={onBlankSubmit}
                   className="group flex flex-col items-center justify-center gap-3 rounded-xl border border-zinc-200 bg-white p-6 transition-all hover:border-indigo-500 hover:bg-indigo-50 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-indigo-500/50 dark:hover:bg-indigo-900/20"
@@ -101,8 +103,21 @@ export function ImportWizardModal({ open, onClose, onBlankSubmit }: ImportWizard
                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
                   </div>
                   <div className="text-center">
-                    <h3 className="text-sm font-bold text-zinc-900 group-hover:text-indigo-700 dark:text-zinc-100 dark:group-hover:text-indigo-300">Blank Document</h3>
-                    <p className="mt-1 text-xs text-zinc-500">Start from scratch.</p>
+                    <h3 className="text-sm font-bold text-zinc-900 group-hover:text-indigo-700 dark:text-zinc-100 dark:group-hover:text-indigo-300">Blank</h3>
+                    <p className="mt-1 text-xs text-zinc-500">Empty canvas.</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setView("templates")}
+                  className="group flex flex-col items-center justify-center gap-3 rounded-xl border border-zinc-200 bg-white p-6 transition-all hover:border-indigo-500 hover:bg-indigo-50 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-indigo-500/50 dark:hover:bg-indigo-900/20"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 text-zinc-400 transition-colors group-hover:bg-indigo-100 group-hover:text-indigo-600 dark:bg-zinc-800 dark:group-hover:bg-indigo-900/50 dark:group-hover:text-indigo-400">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-sm font-bold text-zinc-900 group-hover:text-indigo-700 dark:text-zinc-100 dark:group-hover:text-indigo-300">Templates</h3>
+                    <p className="mt-1 text-xs text-zinc-500">Pick a layout.</p>
                   </div>
                 </button>
 
@@ -114,10 +129,39 @@ export function ImportWizardModal({ open, onClose, onBlankSubmit }: ImportWizard
                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                   </div>
                   <div className="text-center">
-                    <h3 className="text-sm font-bold text-zinc-900 group-hover:text-indigo-700 dark:text-zinc-100 dark:group-hover:text-indigo-300">Import File</h3>
-                    <p className="mt-1 text-xs text-zinc-500">Upload PDF or DOCX.</p>
+                    <h3 className="text-sm font-bold text-zinc-900 group-hover:text-indigo-700 dark:text-zinc-100 dark:group-hover:text-indigo-300">Import</h3>
+                    <p className="mt-1 text-xs text-zinc-500">PDF or DOCX.</p>
                   </div>
                 </button>
+              </div>
+            )}
+
+            {view === "templates" && (
+              <div className="flex-1 overflow-y-auto max-h-[60vh] -mx-2 px-2 pb-4 space-y-6">
+                {['Personal / Career', 'Business', 'Product', 'Marketing', 'Project Management', 'Design', 'HR', 'Academic'].map(category => {
+                  const items = ADVANCED_TEMPLATES.filter(t => t.category === category);
+                  if (items.length === 0) return null;
+                  return (
+                    <div key={category} className="mb-6 last:mb-0">
+                      <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-3 pl-1">{category}</h3>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {items.map(tmpl => (
+                          <button
+                            key={tmpl.id}
+                            onClick={() => onTemplateSelect?.(tmpl)}
+                            className="flex flex-col text-left rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:border-indigo-500 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-indigo-500/50"
+                          >
+                            <h4 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm mb-2">{tmpl.name}</h4>
+                            <div className="w-full h-24 overflow-hidden rounded bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 relative pointer-events-none p-2 flex items-start justify-center">
+                              <div className="scale-[0.25] origin-top opacity-60 w-[400%]" dangerouslySetInnerHTML={{ __html: tmpl.html }} />
+                              <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-zinc-50 dark:from-zinc-900 to-transparent" />
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
@@ -163,7 +207,7 @@ export function ImportWizardModal({ open, onClose, onBlankSubmit }: ImportWizard
             )}
           </div>
 
-          {view === "import" && !uploading && (
+          {(view === "import" || view === "templates") && !uploading && (
              <div className="flex items-center gap-2 border-t border-zinc-100 p-4 dark:border-zinc-800/50">
                <button
                  onClick={() => { setView("menu"); setError(""); }}

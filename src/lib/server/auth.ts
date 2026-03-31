@@ -39,7 +39,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (!user.emailVerified) {
-          return null;
+          throw new Error("EmailNotVerified");
         }
 
         const valid = await compare(parsed.data.password, user.passwordHash);

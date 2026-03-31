@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { defaultResumeDocument } from "@/features/resumes/types";
 import { getAuthSession } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
+import { htmlToTipTapNodes, chunkNodesToPages } from "@/features/import/html-to-tiptap";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 async function getMaxDocsPerUser(): Promise<number> {
   try {
-    const settings = await db.adminSettings.findFirst();
+    const settings = await (db as any).adminSettings.findFirst();
     return settings?.maxDocsPerUser ?? 10;
   } catch {
     return 10;
@@ -57,15 +58,29 @@ export async function POST(request: Request) {
     );
   }
 
-  const body = (await request.json().catch(() => ({}))) as { title?: string };
+  const body = (await request.json().catch(() => ({}))) as { title?: string; templateKey?: string; rawContent?: any; htmlContent?: string };
   const title = body.title?.trim() || `Document ${currentCount + 1}`;
+
+  let finalRawContent = body.rawContent;
+
+  if (body.htmlContent) {
+    const nodes = htmlToTipTapNodes(body.htmlContent);
+    finalRawContent = {
+      type: "mdocs-document",
+      version: 1,
+      header: "<p></p>",
+      footer: "<p></p>",
+      pages: chunkNodesToPages(nodes, 3500),
+    };
+  }
 
   const resume = await db.resume.create({
     data: {
       userId: session.user.id,
       title,
-      templateKey: "modern",
+      templateKey: body.templateKey || "modern",
       content: defaultResumeDocument(),
+      ...(finalRawContent ? { rawContent: finalRawContent } : {}),
     },
     select: { id: true, title: true, createdAt: true },
   });

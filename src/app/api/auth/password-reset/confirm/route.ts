@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Invalid input" }, { status: 400 });
   }
 
-  const tokenHash = hashToken(parsed.data.token);
+  const tokenHash = hashToken(parsed.data.otp);
 
   const token = await db.passwordResetToken.findFirst({
     where: {
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   });
 
   if (!token) {
-    return NextResponse.json({ message: "Invalid or expired reset token" }, { status: 400 });
+    return NextResponse.json({ message: "Invalid or expired OTP" }, { status: 400 });
   }
 
   const passwordHash = await hash(parsed.data.password, 12);

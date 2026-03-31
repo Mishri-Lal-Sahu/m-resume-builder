@@ -28,7 +28,11 @@ function LoginFormInner() {
     const result = await signIn("credentials", { email, password, redirect: false });
     setLoading(false);
     if (!result || result.error) {
-      setError("Invalid email / password, or email not yet verified.");
+      if (result?.error === "EmailNotVerified") {
+        setError("EmailNotVerified");
+      } else {
+        setError("Invalid email / password. Please try again.");
+      }
       return;
     }
     router.push(callbackUrl);
@@ -56,7 +60,24 @@ function LoginFormInner() {
           </div>
           <AuthInput id="password" type="password" required minLength={8} autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
         </div>
-        {error && <AuthAlert variant="error">{error}</AuthAlert>}
+
+        {error === "EmailNotVerified" ? (
+          <div className="rounded-md bg-yellow-50 flex flex-col items-start p-3 border border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-900/50">
+            <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-2">
+              Your email is not verified yet.
+            </p>
+            <button
+              type="button"
+              onClick={() => router.push(`/verify-otp?email=${encodeURIComponent(email)}`)}
+              className="text-sm font-bold text-yellow-900 hover:text-yellow-700 underline dark:text-yellow-400 dark:hover:text-yellow-200"
+            >
+              Proceed to verify email &rarr;
+            </button>
+          </div>
+        ) : error ? (
+          <AuthAlert variant="error">{error}</AuthAlert>
+        ) : null}
+
         <AuthButton loading={loading}>Sign in</AuthButton>
       </form>
 

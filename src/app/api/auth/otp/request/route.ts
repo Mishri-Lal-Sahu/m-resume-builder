@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { otpRequestSchema } from "@/features/auth/validation";
 import { db } from "@/lib/server/db";
-import { sendMail } from "@/lib/server/mailer";
+import { sendMail, professionalOtpEmail } from "@/lib/server/mailer";
 import { expiryFromNow, generateNumericOtp, hashToken } from "@/lib/server/tokens";
 
 export const runtime = "nodejs";
@@ -21,6 +21,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "If account exists, OTP sent" }, { status: 200 });
   }
 
+  // Rate Limiting: Max 5 OTPs per 24 hours
+  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const recentOtps = await db.otpToken.count({
+    where: {
+      email: parsed.data.email,
+      createdAt: { gte: yesterday },
+    },
+  });
+
+  if (recentOtps >= 5) {
+    return NextResponse.json(
+      { message: "You have reached the limit of 5 OTP requests per day. Please try again tomorrow." },
+      { status: 429 }
+    );
+  }
+
   const otp = generateNumericOtp(6);
   const tokenHash = hashToken(otp);
 
@@ -35,8 +51,9 @@ export async function POST(request: Request) {
 
   await sendMail({
     to: parsed.data.email,
-    subject: "Your OTP code",
+    subject: "Your M-Docs Verification Code",
     text: `Your OTP code is ${otp}. It expires in 10 minutes.`,
+    html: professionalOtpEmail(otp, "Email Verification"),
   });
 
   return NextResponse.json({ message: "OTP sent" }, { status: 200 });

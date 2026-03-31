@@ -22,7 +22,7 @@ export const otpVerifySchema = z.object({
 
 export const passwordResetConfirmSchema = z.object({
   email: z.email().toLowerCase(),
-  token: z.string().min(16),
+  otp: z.string().trim().length(6),
   password: z.string().min(8).max(128),
 });
 

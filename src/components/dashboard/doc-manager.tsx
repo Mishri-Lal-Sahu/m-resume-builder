@@ -194,10 +194,14 @@ export function DocManager({ initialResumes }: DocManagerProps) {
   }>({ open: false, limit: 10, current: 0, message: "" });
   const [wizardOpen, setWizardOpen] = useState(false);
 
-  const createDoc = async () => {
+  const createDoc = async (templateData?: { templateKey: string; rawContent?: any; htmlContent?: string; title?: string }) => {
     setCreating(true);
     try {
-      const resp = await fetch("/api/resumes", { method: "POST" });
+      const resp = await fetch("/api/resumes", { 
+        method: "POST",
+        headers: templateData ? { "Content-Type": "application/json" } : undefined,
+        body: templateData ? JSON.stringify(templateData) : undefined,
+      });
       const data = await resp.json();
       if (resp.status === 403 && data.limitType === "documents") {
         setLimitModal({
@@ -259,6 +263,10 @@ export function DocManager({ initialResumes }: DocManagerProps) {
         onBlankSubmit={() => {
           setWizardOpen(false);
           createDoc();
+        }}
+        onTemplateSelect={(t) => {
+          setWizardOpen(false);
+          createDoc({ templateKey: t.id, title: t.name, htmlContent: t.html });
         }}
       />
       {/* ─ Header ─ */}

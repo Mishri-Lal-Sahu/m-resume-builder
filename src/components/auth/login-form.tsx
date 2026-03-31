@@ -28,7 +28,12 @@ export function LoginForm() {
     setIsSubmitting(false);
 
     if (!result || result.error) {
-      setError("Invalid credentials or email not verified yet.");
+      console.log(result);
+      if (result?.error === "EmailNotVerified") {
+        setError("EmailNotVerified");
+      } else {
+        setError("Invalid credentials. Please try again.");
+      }
       return;
     }
 
@@ -65,7 +70,22 @@ export function LoginForm() {
           className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 px-3 py-2 outline-none ring-zinc-900 dark:ring-zinc-200 transition focus:ring-2"
         />
       </div>
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error === "EmailNotVerified" ? (
+        <div className="rounded-md bg-yellow-50 flex flex-col items-start p-3 border border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-900/50">
+          <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-2">
+            Your email is not verified yet.
+          </p>
+          <button
+            type="button"
+            onClick={() => router.push(`/verify-otp?email=${encodeURIComponent(email)}`)}
+            className="text-sm font-bold text-yellow-900 hover:text-yellow-700 underline dark:text-yellow-400 dark:hover:text-yellow-200"
+          >
+            Proceed to verify email &rarr;
+          </button>
+        </div>
+      ) : error ? (
+        <p className="text-sm text-red-600">{error}</p>
+      ) : null}
       <button
         type="submit"
         disabled={isSubmitting}

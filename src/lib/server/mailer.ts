@@ -14,7 +14,7 @@ type MailParams = {
 async function getSmtpConfig() {
   // 1. Try DB settings first
   try {
-    const settings = await db.adminSettings.findFirst();
+    const settings = await (db as any).adminSettings.findFirst();
     if (settings?.smtpHost && settings?.smtpPort && settings?.smtpUser && settings?.smtpPassEncrypted) {
       const pass = decryptField(settings.smtpPassEncrypted);
       if (pass) {
@@ -42,6 +42,27 @@ async function getSmtpConfig() {
   }
 
   return null;
+}
+
+export function professionalOtpEmail(otp: string, action: string = "verification"): string {
+  return `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; border: 1px solid #eaeaea; border-radius: 8px; background-color: #ffffff;">
+      <h2 style="color: #111827; margin-top: 0; font-size: 20px;">Requested Action: ${action}</h2>
+      <p style="color: #4b5563; font-size: 15px; line-height: 1.5; margin-bottom: 24px;">
+        Use the following one-time password (OTP) to complete your ${action}. This code is valid for a limited time.
+      </p>
+      
+      <div style="background-color: #f3f4f6; border-radius: 6px; padding: 16px; text-align: center; margin-bottom: 24px;">
+        <span style="font-size: 32px; font-weight: 700; letter-spacing: 0.2em; color: #111827;">${otp}</span>
+      </div>
+      
+      <p style="color: #6b7280; font-size: 13px; line-height: 1.5; margin-bottom: 0;">
+        If you didn't request this code, you can safely ignore this email.
+        <br/><br/>
+        &copy; ${new Date().getFullYear()} M-Docs Platform.
+      </p>
+    </div>
+  `;
 }
 
 export async function sendMail(params: MailParams) {

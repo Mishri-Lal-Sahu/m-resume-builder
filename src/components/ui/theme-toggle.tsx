@@ -15,14 +15,18 @@ function applyTheme(theme: Theme) {
 }
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window === "undefined") return "light";
-    return window.localStorage.getItem("theme") === "dark" ? "dark" : "light";
-  });
+  // Always start with "light" on both server and client to match SSR output.
+  // The real value from localStorage is synced after mount to avoid hydration mismatch.
+  const [theme, setThemeState] = useState<Theme>("light");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
+    const stored = window.localStorage.getItem("theme");
+    const resolved: Theme = stored === "dark" ? "dark" : "light";
+    setThemeState(resolved);
+    applyTheme(resolved);
+    setMounted(true);
+  }, []);
 
   const toggle = () => {
     const next: Theme = theme === "dark" ? "light" : "dark";
@@ -30,19 +34,20 @@ export function useTheme() {
     applyTheme(next);
   };
 
-  return { theme, toggle };
+  return { theme, toggle, mounted };
 }
 
 // ─── Icon-style toggle (sun / moon) ──────────────────────────────────────────
 
 export function ThemeToggle({ className = "" }: { className?: string }) {
-  const { theme, toggle } = useTheme();
+  const { theme, toggle, mounted } = useTheme();
 
   return (
     <button
       type="button"
       onClick={toggle}
-      title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      suppressHydrationWarning
+      title={mounted ? (theme === "dark" ? "Switch to light mode" : "Switch to dark mode") : "Toggle theme"}
       aria-label="Toggle theme"
       className={`icon-btn flex h-9 w-9 items-center justify-center rounded-full border border-zinc-700 bg-zinc-800/60 text-zinc-400 transition hover:border-zinc-600 hover:bg-zinc-700 hover:text-zinc-200 dark:border-zinc-700 dark:bg-zinc-800/60 ${className}`}
     >
@@ -69,15 +74,16 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
 // ─── Text-style toggle (kept for backwards-compat) ────────────────────────────
 
 export function ThemeToggleText({ className = "" }: { className?: string }) {
-  const { theme, toggle } = useTheme();
+  const { theme, toggle, mounted } = useTheme();
   return (
     <button
       type="button"
       onClick={toggle}
+      suppressHydrationWarning
       aria-label="Toggle theme"
       className={`rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-zinc-600 hover:text-zinc-100 ${className}`}
     >
-      {theme === "dark" ? "☀ Light" : "🌙 Dark"}
+      {mounted ? (theme === "dark" ? "☀ Light" : "🌙 Dark") : "🌙 Dark"}
     </button>
   );
 }
