@@ -91,7 +91,7 @@ export function FloatingToolbar({ id, currentSpacing, currentAlign, onTool, onDu
           </div>
 
           <div className="flex items-center gap-0.5 border-r border-zinc-100 pr-1 dark:border-zinc-800">
-            {(["left", "center", "right"] as const).map((align) => (
+            {(["left", "center", "right"] as const)?.map((align) => (
               <button
                 key={align}
                 onClick={() => onAlignChange(align)}

@@ -91,7 +91,7 @@ export function DocsTable({ initialDocs }: { initialDocs: DocInfo[] }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 transition-colors">
-              {filtered.map((doc) => (
+              {filtered?.map((doc) => (
                 <tr key={doc.id} className="transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/30">
                   <td className="px-5 py-3 font-medium transition-colors" style={{ color: "var(--text-primary)" }}>
                     <div className="flex items-center gap-2">

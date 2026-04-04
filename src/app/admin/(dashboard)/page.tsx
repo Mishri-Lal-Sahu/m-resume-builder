@@ -34,7 +34,7 @@ export default async function AdminOverviewPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        {stats.map((s, i) => (
+        {stats?.map((s, i) => (
           <div key={i} className="flex items-center gap-4 rounded-2xl border p-5 shadow-sm transition-colors" style={{ borderColor: "var(--card-border)", background: "var(--card-bg)" }}>
             <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800/60 ${s.color}`}>
               <s.icon />

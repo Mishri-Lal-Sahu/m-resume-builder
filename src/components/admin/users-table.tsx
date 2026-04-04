@@ -51,7 +51,7 @@ export function UsersTable({ initialUsers }: { initialUsers: UserInfo[] }) {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 transition-colors">
-              {filtered.map((u) => (
+              {filtered?.map((u) => (
                 <tr key={u.id} className="transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/30">
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-3">

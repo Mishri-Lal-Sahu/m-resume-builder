@@ -70,7 +70,7 @@ export function AdminSidebar({ name, email }: { name: string; email: string }) {
         <div className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest transition-colors" style={{ color: "var(--text-muted)" }}>
           Management
         </div>
-        {navItems.map((item) => {
+        {navItems?.map((item) => {
           const active = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
           return (
             <Link

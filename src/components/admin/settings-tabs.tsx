@@ -42,7 +42,7 @@ export function AdminSettingsTabs({ initialName, email, platformSettings }: Prop
     <div className="space-y-6">
       {/* Tab bar */}
       <div className="flex gap-1 rounded-xl border p-1 transition-colors" style={{ borderColor: "var(--card-border)", background: "var(--card-bg)" }}>
-        {TABS.map((tab) => {
+        {TABS?.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
             <button

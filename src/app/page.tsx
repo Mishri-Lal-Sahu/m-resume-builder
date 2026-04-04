@@ -189,7 +189,7 @@ export default function Home() {
           Everything you need
         </motion.h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((f, idx) => (
+          {features?.map((f, idx) => (
             <motion.div
               key={f.title}
               initial={{ opacity: 0, y: 20 }}
@@ -225,7 +225,7 @@ export default function Home() {
           How it works
         </motion.h2>
         <div className="flex flex-col gap-0 md:flex-row md:gap-0">
-          {steps.map((step, idx) => (
+          {steps?.map((step, idx) => (
             <motion.div
               key={step.num}
               initial={{ opacity: 0, y: 18 }}

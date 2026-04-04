@@ -25,7 +25,7 @@ export async function sendNewsletter(subject: string, text: string) {
 
   try {
     // Simple batch sending. For larger scale, a managed queue (bullmq, etc) is recommended.
-    const batchPromises = subscribers.map((sub) =>
+    const batchPromises = subscribers?.map((sub) =>
       sendMail({
         to: sub.email,
         subject,

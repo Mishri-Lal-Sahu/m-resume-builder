@@ -31,7 +31,7 @@ export default async function CollaborationsPage() {
       const acceptedInvites = (await docInvitation.findMany({
         where: {
           status: "ACCEPTED",
-          invitedUserId: session.user.id,
+          invitedUserId: session?.user.id,
         },
         orderBy: { updatedAt: "desc" },
         select: {
@@ -60,7 +60,7 @@ export default async function CollaborationsPage() {
         };
       }>;
 
-      collaboratedDocs = acceptedInvites.map((item) => ({
+      collaboratedDocs = acceptedInvites?.map((item) => ({
         id: item.resume.id,
         title: item.resume.title,
         visibility: item.resume.visibility,
@@ -73,7 +73,7 @@ export default async function CollaborationsPage() {
     collaboratedDocs = [];
   }
 
-  const firstName = session.user.name?.split(" ")[0] ?? session.user.email?.split("@")[0] ?? "there";
+  const firstName = session?.user.name?.split(" ")[0] ?? session?.user.email?.split("@")[0] ?? "there";
 
   return (
     <div className="min-h-screen transition-colors duration-200" style={{ background: "var(--page-bg)" }}>
@@ -118,7 +118,7 @@ export default async function CollaborationsPage() {
                 {firstName.slice(0, 1)}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-semibold transition-colors" style={{ color: "var(--text-primary)" }}>{session.user.name ?? session.user.email}</p>
+                <p className="truncate text-xs font-semibold transition-colors" style={{ color: "var(--text-primary)" }}>{session?.user.name ?? session?.user.email}</p>
                 <p className="text-[10px] transition-colors" style={{ color: "var(--text-muted)" }}>Free plan</p>
               </div>
             </div>
@@ -157,7 +157,7 @@ export default async function CollaborationsPage() {
                 </div>
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {collaboratedDocs.map((doc) => (
+                  {collaboratedDocs?.map((doc) => (
                     <div key={doc.id} className="group relative flex flex-col rounded-2xl border p-5 shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-black/10 dark:hover:shadow-black/20" style={{ background: "var(--card-bg)", borderColor: "var(--card-border)" }}>
                       <div className="flex items-start justify-between">
                         <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 text-sm font-bold text-white shadow-lg">

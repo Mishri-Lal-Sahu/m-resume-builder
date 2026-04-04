@@ -48,7 +48,7 @@ export default function RootLayout({
                 }}
               />
               {/* Particles */}
-              {particles.map((p) => <Particle key={p.id} delay={p.delay} x={p.x} size={p.size} />)}
+              {particles?.map((p) => <Particle key={p.id} delay={p.delay} x={p.x} size={p.size} />)}
             </div>
 
             <Navbar />

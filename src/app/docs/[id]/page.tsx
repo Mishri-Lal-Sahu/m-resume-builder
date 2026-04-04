@@ -4,7 +4,7 @@ import { PublicDocsViewer } from "@/components/docs/public-viewer";
 import { getAuthSession } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
 import { getDocAccess } from "@/lib/server/collaboration/helpers";
-import { ResumeDocument } from "@/features/resumes/types";
+import { normalizeResumeDocument } from "@/features/resumes/types";
 import { resumeToTipTap } from "@/features/resumes/tiptap-bridge";
 import type { TipTapDoc } from "@/features/resumes/tiptap-bridge";
 
@@ -64,7 +64,7 @@ export default async function DocsPage({ params }: { params: Promise<{ id: strin
   // Final fallback: convert old section-based resume content
   if (!initialTipTapJson && resume.content) {
     initialTipTapJson = resumeToTipTap(
-      resume.content as unknown as ResumeDocument,
+      normalizeResumeDocument(resume.content),
       resume.title,
     );
   }

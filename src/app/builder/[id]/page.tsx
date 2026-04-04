@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { ResumeBuilder } from "@/components/builder/resume-builder";
-import { ResumeDocument } from "@/features/resumes/types";
+import { normalizeResumeDocument } from "@/features/resumes/types";
 import { getAuthSession } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
 
@@ -41,7 +41,7 @@ export default async function BuilderPage({ params }: { params: Promise<{ id: st
       initialProfilePhotoUrl={resume.profilePhotoUrl}
       initialVisibility={resume.visibility}
       initialSlug={resume.slug}
-      initialContent={resume.content as unknown as ResumeDocument}
+      initialContent={normalizeResumeDocument(resume.content)}
     />
   );
 }

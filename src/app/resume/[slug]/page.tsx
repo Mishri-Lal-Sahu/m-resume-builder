@@ -1,22 +1,23 @@
 import { db } from "@/lib/server/db";
 import { notFound } from "next/navigation";
 import { TemplatePreview } from "@/components/templates/template-preview";
-import { ResumeDocument } from "@/features/resumes/types";
+import { normalizeResumeDocument } from "@/features/resumes/types";
 
 type PublicResumePageProps = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 export default async function PublicResumePage({ params }: PublicResumePageProps) {
+  const { slug } = await params;
   const resume = await db.resume.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
   });
 
   if (!resume || resume.visibility !== "PUBLIC") {
     notFound();
   }
 
-  const content = resume.content as unknown as ResumeDocument;
+  const content = normalizeResumeDocument(resume.content);
 
   return (
     <div className="min-h-screen bg-zinc-50 py-12 dark:bg-zinc-950">

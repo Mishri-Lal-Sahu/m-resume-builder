@@ -1,12 +1,13 @@
 {
-  "name": "m-resume-builder",
-  "version": "0.1.0",
+  "name": "m-docs",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "generate": "prisma generate"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

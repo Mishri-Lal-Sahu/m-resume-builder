@@ -66,7 +66,7 @@ export default async function AdminAnalyticsPage() {
         <div className="col-span-full rounded-2xl border p-6 transition-colors shadow-sm" style={{ borderColor: "var(--card-border)", background: "var(--card-bg)" }}>
           <h2 className="mb-6 font-bold transition-colors" style={{ color: "var(--text-primary)" }}>Traffic Trends & Activity</h2>
           <div className="flex h-48 items-end gap-1 sm:gap-2">
-            {trendEntries.map(([date, count]) => {
+            {trendEntries?.map(([date, count]) => {
               const heightPct = Math.max(4, (count / maxTraffic) * 100);
               const label = new Date(date).toLocaleDateString(undefined, { month: "short", day: "numeric" });
               return (
@@ -91,7 +91,7 @@ export default async function AdminAnalyticsPage() {
             {topCountries.length === 0 ? (
               <p className="text-sm transition-colors" style={{ color: "var(--text-muted)" }}>No geographic data logged recently.</p>
             ) : (
-              topCountries.map(([country, count]) => (
+              topCountries?.map(([country, count]) => (
                 <div key={country}>
                   <div className="mb-1 flex justify-between text-sm transition-colors" style={{ color: "var(--text-primary)" }}>
                     <span className="font-medium">{country}</span>
@@ -116,7 +116,7 @@ export default async function AdminAnalyticsPage() {
             {topActions.length === 0 ? (
               <p className="text-sm transition-colors" style={{ color: "var(--text-muted)" }}>No events logged recently.</p>
             ) : (
-              topActions.map(([action, count]) => (
+              topActions?.map(([action, count]) => (
                 <div key={action} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0 transition-colors" style={{ borderColor: "var(--sidebar-border)" }}>
                   <div className="flex items-center gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800 text-xs font-bold transition-colors" style={{ color: "var(--text-muted)" }}>
