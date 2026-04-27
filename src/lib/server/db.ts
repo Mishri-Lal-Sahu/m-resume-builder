@@ -8,11 +8,12 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function createPrismaClient() {
+  const url = process.env.DATABASE_URL ?? "";
+  const isRemote = !url.includes("localhost") && !url.includes("127.0.0.1");
+
   const adapter = new PrismaPg({
-    connectionString: process.env.DATABASE_URL!,
-    ssl: process.env.NODE_ENV === "production"
-      ? { rejectUnauthorized: false }
-      : undefined,
+    connectionString: url,
+    ssl: isRemote ? { rejectUnauthorized: false } : undefined,
   });
   return new PrismaClient({ adapter });
 }
