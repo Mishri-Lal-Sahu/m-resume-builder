@@ -10,7 +10,8 @@ import { loginSchema } from "@/features/auth/validation";
 import { db } from "@/lib/server/db";
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(db),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  adapter: PrismaAdapter(db as any),
   session: {
     strategy: "jwt",
   },
