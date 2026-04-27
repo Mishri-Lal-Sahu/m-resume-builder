@@ -3,7 +3,7 @@ import { normalizeResumeDocument } from "@/features/resumes/types";
 import { resumePatchSchema } from "@/features/resumes/validation";
 import { getAuthSession } from "@/lib/server/auth";
 import { db } from "@/lib/server/db";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

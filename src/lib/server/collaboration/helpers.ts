@@ -1,7 +1,7 @@
 import "server-only";
 
 import { db } from "@/lib/server/db";
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "@/generated/prisma/client";
 
 const ACTIVE_INVITE_STATUSES = ["PENDING", "ACCEPTED"] as const;
 

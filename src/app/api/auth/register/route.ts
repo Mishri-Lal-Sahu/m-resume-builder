@@ -1,5 +1,5 @@
 import { hash } from "bcryptjs";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import { NextResponse } from "next/server";
 
 import { signupSchema } from "@/features/auth/validation";

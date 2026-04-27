@@ -1,6 +1,6 @@
 "use client";
 
-import { Resume } from "@prisma/client";
+import { Resume } from "@/generated/prisma/client";
 import { formatDistanceToNow } from "date-fns";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
