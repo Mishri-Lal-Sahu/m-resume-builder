@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { SaveStatus } from "./docs-builder";
 import type { Editor } from "@tiptap/react";
 import type { TipTapDoc } from "@/features/resumes/tiptap-bridge";
@@ -83,9 +84,14 @@ export function DocsHeader({ resumeId, title, editor, onTitleChange, status, get
       {/* M-Docs Logo */}
       <Link href="/dashboard" className="mr-2 shrink-0">
         <div className="flex items-center gap-2 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-md shadow-indigo-500/30 transition-transform group-hover:scale-105">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" /></svg>
-          </div>
+          <Image
+            src="/android-chrome-192x192.png"
+            alt="M-Docs logo"
+            width={36}
+            height={36}
+            className="rounded-xl shadow-md shadow-indigo-500/30 transition-transform group-hover:scale-105"
+            priority
+          />
           <span className="hidden sm:block text-sm font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-violet-400">M-Docs</span>
         </div>
       </Link>

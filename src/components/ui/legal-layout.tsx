@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export function LegalLayout({ title, children }: { title: string; children: React.ReactNode }) {
@@ -10,13 +11,13 @@ export function LegalLayout({ title, children }: { title: string; children: Reac
       {/* Standard top nav from landing page style */}
       <nav className="relative z-10 flex items-center justify-between px-5 py-4 sm:px-10 sm:py-5 border-b transition-colors" style={{ borderColor: "var(--card-border)", background: "var(--card-bg)" }}>
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/30 transition-transform group-hover:scale-105">
-            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
-              <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
-              <path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
-            </svg>
-          </div>
+          <Image
+            src="/android-chrome-192x192.png"
+            alt="M-Docs logo"
+            width={36}
+            height={36}
+            className="rounded-xl shadow-lg shadow-indigo-500/30 transition-transform group-hover:scale-105"
+          />
           <span className="text-lg font-bold tracking-tight transition-colors" style={{ color: "var(--text-primary)" }}>
             M-Docs
           </span>

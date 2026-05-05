@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { AdminLogout } from "@/components/admin/admin-logout";
@@ -58,10 +59,14 @@ export function AdminSidebar({ name, email }: { name: string; email: string }) {
     <aside className="hidden md:flex w-60 flex-col border-r backdrop-blur-md transition-colors shrink-0" style={{ background: "var(--sidebar-bg)", borderColor: "var(--sidebar-border)" }}>
       {/* Logo */}
       <div className="flex h-16 items-center gap-2.5 border-b px-5 transition-colors" style={{ borderColor: "var(--sidebar-border)" }}>
-        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-orange-600 shadow-md shadow-rose-500/30">
-           <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" /></svg>
-          
-        </div>
+        <Image
+          src="/android-chrome-192x192.png"
+          alt="M-Docs logo"
+          width={32}
+          height={32}
+          className="rounded-xl shadow-md shadow-indigo-500/30"
+          priority
+        />
         <span className="text-sm font-bold tracking-tight transition-colors" style={{ color: "var(--text-primary)" }}>M-Docs Admin</span>
       </div>
 

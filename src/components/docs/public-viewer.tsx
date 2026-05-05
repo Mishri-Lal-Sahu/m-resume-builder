@@ -25,6 +25,7 @@ import { BoardExtension } from "@/features/resumes/tiptap-board-node";
 import Mention from "@tiptap/extension-mention";
 import { TipTapDoc } from "@/features/resumes/tiptap-bridge";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import NextImage from "next/image";
 
 const PAGE_WIDTH_PX = 794; // 210mm
 const PAGE_HEIGHT_PX = 1123; // 297mm
@@ -79,9 +80,14 @@ export function PublicDocsViewer({
       {/* Chrome Header */}
       <header className="sticky top-0 z-50 flex w-full h-14 items-center justify-between border-b border-zinc-200 bg-white/80 px-4 py-2 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-900/80 md:px-8 print:hidden">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 shadow-md shadow-indigo-500/30">
-             <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" /></svg>
-          </div>
+          <NextImage
+            src="/android-chrome-192x192.png"
+            alt="M-Docs logo"
+            width={32}
+            height={32}
+            className="rounded-lg shadow-md shadow-indigo-500/30"
+            priority
+          />
         {/* platform name */}
         <span className="text-lg font-bold text-zinc-800 dark:text-zinc-100">M-Docs</span>
 

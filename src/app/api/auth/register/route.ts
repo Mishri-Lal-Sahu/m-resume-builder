@@ -62,6 +62,7 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
+    console.error(error);
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") {
       return NextResponse.json(
         { message: "Database schema is not initialized. Run setup migration." },
