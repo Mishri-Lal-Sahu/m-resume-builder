@@ -287,7 +287,7 @@ export function DocManager({ initialResumes }: DocManagerProps) {
             {creating ? "Creating…" : "New Document"}
           </motion.button>
           <button
-            onClick={() => signOut()}
+            onClick={() => signOut({ callbackUrl: window.location.origin + "/login" })}
             className="rounded-xl border px-5 py-2.5 text-sm font-semibold transition hover:bg-zinc-100 dark:hover:bg-zinc-800/50"
             style={{ borderColor: "var(--card-border)", color: "var(--text-secondary)" }}
           >

@@ -82,7 +82,7 @@ export function UserMenu() {
               <div className="my-1 border-t transition-colors" style={{ borderColor: "var(--card-border)" }} />
 
               <button
-                onClick={() => { setOpen(false); signOut({ callbackUrl: "/login" }); }}
+                onClick={() => { setOpen(false); signOut({ callbackUrl: window.location.origin + "/login" }); }}
                 className="flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

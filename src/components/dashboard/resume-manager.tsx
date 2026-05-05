@@ -79,7 +79,7 @@ export function ResumeManager({ initialResumes }: ResumeManagerProps) {
             {creating ? "Creating..." : "New Resume"}
           </button>
           <button
-            onClick={() => signOut()}
+            onClick={() => signOut({ callbackUrl: window.location.origin + "/login" })}
             className="rounded-xl border border-zinc-200 px-6 py-2.5 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-900"
           >
             Logout
