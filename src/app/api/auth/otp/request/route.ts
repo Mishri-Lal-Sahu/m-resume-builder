@@ -49,12 +49,16 @@ export async function POST(request: Request) {
     },
   });
 
-  await sendMail({
-    to: parsed.data.email,
-    subject: "Your M-Docs Verification Code",
-    text: `Your OTP code is ${otp}. It expires in 10 minutes.`,
-    html: professionalOtpEmail(otp, "Email Verification"),
-  });
+  try {
+    await sendMail({
+      to: parsed.data.email,
+      subject: "Your M-Docs Verification Code",
+      text: `Your OTP code is ${otp}. It expires in 10 minutes.`,
+      html: professionalOtpEmail(otp, "Email Verification"),
+    });
+  } catch {
+    return NextResponse.json({ message: "Failed to send OTP email. Check SMTP settings." }, { status: 500 });
+  }
 
   return NextResponse.json({ message: "OTP sent" }, { status: 200 });
 }

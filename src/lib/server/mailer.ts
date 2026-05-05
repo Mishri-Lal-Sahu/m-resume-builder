@@ -121,6 +121,9 @@ export async function sendMail(params: MailParams) {
     },
   });
 
+  // Verify SMTP connection before sending
+  await transporter.verify();
+
   await transporter.sendMail({
     from: config.from,
     to: params.to,
